@@ -77,7 +77,7 @@ const DEFAULT_DATA = {
 
 // ===================== GOOGLE SHEETS SYNC =====================
 // SHEETS_ID deve stare QUI, prima di loadData
-const SHEETS_ID = localStorage.getItem('pinarolese_sheets_id') || "1TznhhEsvFdnGP31TSbSItcrn3qAmXkag";
+const SHEETS_ID = localStorage.getItem('pinarolese_sheets_id') || "1PyjvETJgeUSI-YvyULD1RvSCx703ew1hHVGM8nzJ77o";
 
 // Campi gestiti da Sheets: vengono sempre presi dal foglio, mai dal localStorage
 const SHEETS_FIELDS = ['partite', 'notizie', 'eventi'];
