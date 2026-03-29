@@ -10,6 +10,11 @@
 // il valore di default definito in DEFAULT_DATA (app.js).
 // =====================================================================
 
+// URL valido = inizia con http/https e non è un segnaposto
+function validUrl(v) {
+  return typeof v === 'string' && /^https?:\/\//.test(v) && !v.includes('INSERISCI');
+}
+
 // ---------------------------------------------------------------
 // injectSheetsData(data)
 // data = oggetto con chiavi opzionali: notizie, partite, giocatori,
@@ -32,16 +37,12 @@ function injectSheetsData(data) {
   // --- Partite ---
   if (Array.isArray(data.partite)) {
     DATA.partite = data.partite.map((r, i) => ({
-      id:        i + 1,
-      squadra:   r.squadra   || '',
-      data:      r.data      || '',
-      ora:       r.ora       || '',
-      casa:      r.casa      || '',
-      ospite:    r.ospite    || '',
-      golCasa:   r.golcasa   !== '' && r.golcasa   !== undefined ? parseInt(r.golcasa)   : undefined,
-      golOspite: r.golospite !== '' && r.golospite !== undefined ? parseInt(r.golospite) : undefined,
-      luogo:     r.luogo     || '',
-      tipo:      r.tipo      || 'prossima'
+      id:      i + 1,
+      squadra: r.squadra || '',
+      data:    r.data    || '',
+      ora:     r.ora     || '',
+      casa:    r.casa    || '',
+      ospite:  r.ospite  || ''
     }));
   }
 
@@ -100,7 +101,7 @@ function injectSheetsData(data) {
     DATA.sponsor = data.sponsor.map((r, i) => ({
       id:        i + 1,
       nome:      r.nome      || '',
-      banner:    r.banner    || '',
+      banner:    validUrl(r.banner) ? r.banner : (DEFAULT_DATA.sponsor[i]?.banner || ''),
       indirizzo: r.indirizzo || '',
       telefono:  r.telefono  || '',
       maps:      r.maps      || ''
@@ -112,7 +113,7 @@ function injectSheetsData(data) {
     DATA.collaborazioni = data.collaborazioni.map((r, i) => ({
       id:        i + 1,
       nome:      r.nome      || '',
-      banner:    r.banner    || '',
+      banner:    validUrl(r.banner) ? r.banner : (DEFAULT_DATA.collaborazioni[i]?.banner || ''),
       facebook:  r.facebook  || '',
       instagram: r.instagram || '',
       indirizzo: r.indirizzo || '',
@@ -153,7 +154,8 @@ function injectSheetsData(data) {
       ora:         r.ora         || '',
       luogo:       r.luogo       || '',
       descrizione: r.descrizione || '',
-      mapsUrl:     r.maps        || r.mapsurl || ''
+      mapsUrl:     r.maps        || r.mapsurl || '',
+      immagine:    validUrl(r.immagine) ? r.immagine : ''
     }));
   }
 

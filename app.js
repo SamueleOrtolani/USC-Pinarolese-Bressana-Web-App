@@ -50,17 +50,9 @@ const DEFAULT_DATA = {
     { tipo: "persona", valore: "Presidente: Marco Gioannini - Cel. 3382581122", maps: "", tel: "3382581122" },
     { tipo: "persona", valore: "Vicepresidente: Claudio Bianchini - Cel. 3939337697", maps: "", tel: "3939337697" }
   ],
-  collaborazioni: [
-    { id: 1, nome: "Atleti Al Tuo Fianco", indirizzo: "", telefono: "", maps: "", banner: "images/img3.jpg", facebook: "https://www.facebook.com/atletialtuofianco/?locale=it_IT", instagram: "https://www.instagram.com/atletialtuofianco/" }
-  ],
-  sponsor: [
-    { id: 1, nome: "Al Castello", indirizzo: "Via Depretis Agostino, 126, Pinarolo Po", telefono: "0383 812035", maps: "https://maps.app.goo.gl/xjHHBY3uFRTnLGEQA?g_st=ic", banner: "images/img4.jpg" }
-  ],
-  wallpaper: [
-    { id: 1, titolo: "Campo Pinarolese", immagine: "images/img5.jpg" },
-    { id: 2, titolo: "Stemma USC Pinarolese Bressana", immagine: "images/img6.jpg" },
-    { id: 3, titolo: "Stadio Pinarolese", immagine: "images/img7.jpg" }
-  ],
+  collaborazioni: [],
+  sponsor: [],
+  wallpaper: [],
   campiPropri: [
     { id: 1, nome: "Campo Sportivo Pinarolo Po", indirizzo: "Via Franco Barbieri, 7, 27040 Pinarolo Po (PV)", maps: "https://maps.app.goo.gl/Vy2VQgPx3fVwgpCK8" },
     { id: 2, nome: "Campo Sportivo Comunale Bressana Bottarone", indirizzo: "Piazza Marconi Guglielmo, 9, 27042 Bressana (PV)", maps: "https://maps.app.goo.gl/dLd7B7osqbx297M16" },
@@ -206,7 +198,7 @@ async function syncFromSheets() {
 
   injectSheetsData(data);
 
-  const found = keys.filter((k, i) => results[i]);
+  const found = keys.filter((_, i) => results[i]);
   showSheetsStatus(found.length ? '✅ Aggiornato' : '⚠️ Nessun foglio trovato — verifica SHEETS_ID e nomi dei tab');
   setTimeout(() => showSheetsStatus(''), 4000);
 }
@@ -414,9 +406,9 @@ function renderEventi() {
 
 // ===================== PARTITE =====================
 // ===================== PARTITE =====================
-let partiteTab = 'all';
 let calMese = null;
 let calSelectedDate = null;
+let partiteFilterReady = false;
 let calAperto = true;
 
 function toggleCalendario() {
@@ -427,15 +419,6 @@ function toggleCalendario() {
   if(coll) coll.classList.toggle('open', calAperto);
 }
 
-function setPartiteTab(tab) {
-  partiteTab = tab;
-  calSelectedDate = null;
-  ['all','future','past'].forEach(t => {
-    const btn = document.getElementById('tab-' + t);
-    if(btn) btn.className = 'partite-tab' + (t === tab ? ` tab-active-${t==='all'?'all':t==='future'?'future':'past'}` : '');
-  });
-  renderPartite();
-}
 
 function renderFavBanner() {
   const container = document.getElementById('fav-banner-container');
@@ -477,6 +460,7 @@ function setFavSquadra(id) {
   setCookie('pinarolese_preferita', id || '', 365);
   document.getElementById('fav-modal-overlay').classList.remove('open');
   renderFavBanner();
+  partiteFilterReady = false;
   populateSquadraFilter('');
   renderPartite();
 }
@@ -500,11 +484,12 @@ function populateSquadraFilter(keepValue) {
   html += others.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
   sel.innerHTML = html;
 
-  // Ripristina il valore precedente se ancora valido
-  if(keepValue) sel.value = keepValue;
-
-  // Se c'è una preferita e non c'è ancora nessun filtro, pre-seleziona la preferita
-  if(fav && !keepValue && sel.value === '') sel.value = fav.nome;
+  if(keepValue) {
+    sel.value = keepValue;
+  } else if(fav && !partiteFilterReady) {
+    sel.value = fav.nome;
+  }
+  partiteFilterReady = true;
 }
 
 function renderPartite() {
@@ -524,23 +509,12 @@ function renderPartite() {
   let partite = [...DATA.partite];
   if(squadraFilter) partite = partite.filter(p => p.squadra === squadraFilter);
 
-  const today = new Date().toISOString().split('T')[0];
-  if(partiteTab === 'future') partite = partite.filter(p => p.tipo === 'prossima' || p.data >= today);
-  if(partiteTab === 'past')   partite = partite.filter(p => p.tipo === 'risultato' || p.data < today);
   if(calSelectedDate) partite = partite.filter(p => p.data === calSelectedDate);
 
-  partite.sort((a,b) => partiteTab === 'future' ? a.data.localeCompare(b.data) : b.data.localeCompare(a.data));
+  partite.sort((a,b) => a.data.localeCompare(b.data));
 
   if(!partite.length) {
-    list.innerHTML = `<div class="empty-state" style="padding:40px 20px">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="5" style="margin:0 auto 12px;display:block;opacity:0.2">
-        <circle cx="50" cy="50" r="46"/><polygon points="50,35 63,44 58,59 42,59 37,44"/>
-        <line x1="50" y1="35" x2="50" y2="4"/><line x1="63" y1="44" x2="88" y2="28"/>
-        <line x1="58" y1="59" x2="78" y2="82"/><line x1="42" y1="59" x2="22" y2="82"/>
-        <line x1="37" y1="44" x2="12" y2="28"/>
-      </svg>
-      <p>Nessuna partita trovata</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state" style="padding:40px 20px"><p>Nessuna partita trovata</p></div>`;
     return;
   }
 
@@ -553,7 +527,7 @@ function renderPartite() {
   const months = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
   list.innerHTML = Object.keys(byMonth)
-    .sort((a,b) => partiteTab==='future' ? a.localeCompare(b) : b.localeCompare(a))
+    .sort((a,b) => a.localeCompare(b))
     .map(key => {
       const [y, m] = key.split('-');
       const label = months[parseInt(m)-1] + ' ' + y;
@@ -561,21 +535,12 @@ function renderPartite() {
         <div style="padding:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--testo-muted);margin-top:8px">${label}</div>
         ${byMonth[key].map(p => `
           <div class="partita-card" style="${calSelectedDate===p.data?'border-left:3px solid var(--azzurro)':''}">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div class="partita-squadra">${p.squadra}</div>
-              <span class="badge ${p.tipo==='risultato'?'badge-blue':'badge-orange'}">${p.tipo==='risultato'?'Risultato':'Prossima'}</span>
-            </div>
-            <div class="partita-date">${formatDate(p.data)}${p.ora ? ' · Ore '+p.ora : ''}</div>
+            <div class="partita-squadra">${p.squadra}</div>
+            <div class="partita-date" style="text-align:center;margin:6px 0 2px">${formatDate(p.data)}</div>
             <div class="partita-teams">
               <div class="partita-team">${p.casa}</div>
-              ${p.tipo==='risultato'
-                ? `<div class="partita-score">${p.golCasa} - ${p.golOspite}</div>`
-                : `<div class="partita-score upcoming">Ore ${p.ora||'--'}</div>`}
+              <div class="partita-score upcoming">Ore ${p.ora||'--'}</div>
               <div class="partita-team away">${p.ospite}</div>
-            </div>
-            <div class="partita-luogo">
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              ${p.luogo}
             </div>
           </div>
         `).join('')}
@@ -608,7 +573,7 @@ function renderCalendario() {
     if(!p.data || !p.data.startsWith(`${year}-${String(month+1).padStart(2,'0')}`)) return;
     if(squadraFilter && p.squadra !== squadraFilter) return;
     if(!matchDates[p.data]) matchDates[p.data] = [];
-    matchDates[p.data].push(p.tipo);
+    matchDates[p.data].push('prossima');
   });
   // Aggiungi anche gli eventi al calendario
   (DATA.eventi || []).forEach(e => {
@@ -626,18 +591,15 @@ function renderCalendario() {
     const isSelected = dateStr === calSelectedDate;
     const matches = matchDates[dateStr] || [];
     const hasFuture = matches.includes('prossima');
-    const hasResult = matches.includes('risultato');
     const hasEvento = matches.includes('evento');
     let cls = 'cal-day';
     if(isSelected) cls += ' cal-selected';
     else if(hasFuture) cls += ' cal-has-future';
-    else if(hasResult) cls += ' cal-has-result';
     else if(hasEvento) cls += ' cal-has-evento';
     if(isToday) cls += ' cal-today';
     const dot = isSelected
-      ? (hasFuture||hasResult||hasEvento ? `<div class="cal-dot cal-dot-white"></div>` : '')
+      ? (hasFuture||hasEvento ? `<div class="cal-dot cal-dot-white"></div>` : '')
       : hasFuture ? `<div class="cal-dot cal-dot-orange"></div>`
-      : hasResult ? `<div class="cal-dot cal-dot-green"></div>`
       : hasEvento ? `<div class="cal-dot cal-dot-purple"></div>` : '';
     const clickable = matches.length > 0 ? `onclick="selectCalDay('${dateStr}')"` : '';
     cells += `<div class="${cls}" ${clickable}><span>${d}</span>${dot}</div>`;
@@ -900,41 +862,57 @@ function renderAltro() {
         <svg class="altro-card-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="altro-card-body">
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+        <div class="contatti-list">
           ${DATA.contatti.map(c => {
-            const svgPin    = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
-            const svgMail   = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`;
-            const svgPhone  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>`;
-            const svgPerson = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
             if (c.tipo === 'indirizzo') return `
-              <div style="display:flex;align-items:flex-start;gap:10px;font-size:14px">
-                ${svgPin}
-                <span style="color:var(--testo-muted)">${c.valore}${c.maps ? ` <a href="${c.maps}" target="_blank" rel="noopener" style="color:var(--azzurro);font-size:12px;font-weight:600;margin-left:4px">Maps →</a>` : ''}</span>
-              </div>`;
-            if (c.tipo === 'email') return `
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-                ${svgMail}
-                <a href="mailto:${c.valore}" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--azzurro);font-size:13px;font-weight:600;background:var(--azzurro-light);padding:5px 10px;border-radius:20px">${c.valore}</a>
-              </div>`;
-            if (c.tipo === 'telefono') return `
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-                ${svgPhone}
-                <a href="tel:${c.valore.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--azzurro);font-size:13px;font-weight:600;background:var(--azzurro-light);padding:5px 10px;border-radius:20px">${c.valore}</a>
-              </div>`;
-            if (c.tipo === 'persona') return `
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-                ${svgPerson}
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                  <span style="color:var(--testo-muted)">${c.valore}</span>
-                  ${c.tel ? `<a href="tel:${c.tel.replace(/\s/g,'')}" class="btn-tel" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:white;font-size:11px;font-weight:600;background:var(--arancione);padding:5px 10px;border-radius:20px">
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
-                    ${c.tel}
-                  </a>` : ''}
+              <div class="contatto-row">
+                <div class="contatto-icon contatto-icon-blue">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div class="contatto-body">
+                  <span class="contatto-label">Indirizzo</span>
+                  <span class="contatto-valore">${c.valore}</span>
+                  ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="contatto-btn contatto-btn-outline">Apri Maps</a>` : ''}
                 </div>
               </div>`;
+            if (c.tipo === 'email') return `
+              <div class="contatto-row">
+                <div class="contatto-icon contatto-icon-blue">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
+                <div class="contatto-body">
+                  <span class="contatto-label">Email</span>
+                  <a href="mailto:${c.valore}" class="contatto-btn contatto-btn-filled">${c.valore}</a>
+                </div>
+              </div>`;
+            if (c.tipo === 'telefono') return `
+              <div class="contatto-row">
+                <div class="contatto-icon contatto-icon-blue">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+                </div>
+                <div class="contatto-body">
+                  <span class="contatto-label">Telefono</span>
+                  <a href="tel:${c.valore.replace(/\s/g,'')}" class="contatto-btn contatto-btn-filled">${c.valore}</a>
+                </div>
+              </div>`;
+            if (c.tipo === 'persona') {
+              const parti = c.valore.split(' - Cel.');
+              const nome = parti[0] ? parti[0].trim() : c.valore;
+              return `
+              <div class="contatto-row">
+                <div class="contatto-icon contatto-icon-orange">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="contatto-body">
+                  <span class="contatto-valore">${nome}</span>
+                  ${c.tel ? `<a href="tel:${c.tel.replace(/\s/g,'')}" class="contatto-btn contatto-btn-orange">Chiama ${c.tel}</a>` : ''}
+                </div>
+              </div>`;
+            }
             return '';
           }).join('')}
         </div>
+        <div style="margin-bottom:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--testo-muted)">Seguici</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a href="https://www.facebook.com/USCpinarolesebressana?locale=it_IT" target="_blank" rel="noopener"
             style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--azzurro);font-size:13px;font-weight:600;background:var(--azzurro-light);padding:7px 13px;border-radius:20px">
@@ -1122,7 +1100,8 @@ function renderAltro() {
         </button>
       </div>
     </div>
-    <div class="app-credits" style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    </div>
+    <div class="app-credits" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 0 8px">
       &copy; 2026 Samuele Ortolani
     </div>
   `;
