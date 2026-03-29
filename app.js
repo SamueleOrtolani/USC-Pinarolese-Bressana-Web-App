@@ -337,7 +337,7 @@ function renderHome() {
   }
   const latest = [...DATA.notizie].sort((a,b) => b.data.localeCompare(a.data)).slice(0, 5);
   container.innerHTML = `
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--testo);margin-bottom:10px;">Ultime News</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--testo);margin-bottom:4px;">Ultime News</div>
     ${latest.map(n => `
       <div class="news-card">
         <h3>${n.titolo}</h3>
