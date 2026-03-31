@@ -72,7 +72,7 @@ const DEFAULT_DATA = {
 const SHEETS_ID = localStorage.getItem('pinarolese_sheets_id') || "1D-wkCluigzmaLPaFCgXWReP_275y54dlzm7xyZYyZMQ";
 
 // Campi gestiti da Sheets: vengono sempre presi dal foglio, mai dal localStorage
-const SHEETS_FIELDS = ['notizie', 'partite', 'eventi', 'campiAltri', 'campiPropri', 'sponsor', 'collaborazioni', 'wallpaper', 'contatti', 'squadre', 'societa'];
+const SHEETS_FIELDS = ['notizie', 'partite', 'eventi', 'campiPropri', 'sponsor', 'collaborazioni', 'wallpaper', 'contatti', 'squadre', 'societa'];
 
 function loadData() {
   try {
@@ -181,11 +181,11 @@ async function syncFromSheets() {
   showSheetsStatus('⏳ Aggiornamento da Google Sheets...');
 
   const tabNames = [
-    'Notizie', 'Partite', 'Giocatori', 'CampiAltri', 'CampiPropri',
+    'Notizie', 'Partite', 'Giocatori', 'CampiPropri',
     'Eventi', 'Squadre', 'Sponsor', 'Collaborazioni', 'Wallpaper', 'Contatti', 'Societa'
   ];
   const keys = [
-    'notizie', 'partite', 'giocatori', 'campiAltri', 'campiPropri',
+    'notizie', 'partite', 'giocatori', 'campiPropri',
     'eventi', 'squadre', 'sponsor', 'collaborazioni', 'wallpaper', 'contatti', 'societa'
   ];
 
@@ -340,6 +340,7 @@ function renderHome() {
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--testo);margin-bottom:4px;">Ultime News</div>
     ${latest.map(n => `
       <div class="news-card">
+        ${n.immagine ? `<img src="${n.immagine}" alt="${n.titolo}" style="width:100%;height:auto;border-radius:10px;display:block;margin-bottom:8px">` : ''}
         <h3>${n.titolo}</h3>
         <div class="date">${formatDate(n.data)}</div>
         <div class="body">${n.corpo}</div>
@@ -356,6 +357,7 @@ function renderNotizie() {
   }
   list.innerHTML = [...DATA.notizie].sort((a,b)=>b.data.localeCompare(a.data)).map(n => `
     <div class="news-card">
+      ${n.immagine ? `<img src="${n.immagine}" alt="${n.titolo}" style="width:100%;height:auto;border-radius:10px;display:block;margin-bottom:8px">` : ''}
       <h3>${n.titolo}</h3>
       <div class="date">${formatDate(n.data)}</div>
       <div class="body">${n.corpo}</div>
@@ -371,12 +373,12 @@ function renderEventi() {
   }
   list.innerHTML = [...DATA.eventi].sort((a,b)=>a.data.localeCompare(b.data)).map(e => {
     const imgHtml = e.immagine
-      ? `<img src="${e.immagine}" style="width:100%;height:160px;object-fit:cover" alt="${e.titolo}"/>`
+      ? `<img src="${e.immagine}" style="width:100%;height:auto;display:block" alt="${e.titolo}"/>`
       : `<div class="event-img"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="6" x2="12" y2="18"/><path d="M5 9c0 0 3 1 7 1s7-1 7-1"/><path d="M5 15c0 0 3-1 7-1s7 1 7 1"/></svg></div>`;
     const mapUrl = e.mapsUrl
-      ? `<a class="event-map-btn" href="${e.mapsUrl}" target="_blank" rel="noopener">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-           Apri su Google Maps
+      ? `<a class="campo-maps-btn" href="${e.mapsUrl}" target="_blank" rel="noopener">
+           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+           Maps
          </a>` : '';
     return `
     <div class="event-card">
@@ -536,12 +538,26 @@ function renderPartite() {
         ${byMonth[key].map(p => `
           <div class="partita-card" style="${calSelectedDate===p.data?'border-left:3px solid var(--azzurro)':''}">
             <div class="partita-squadra">${p.squadra}</div>
+            ${p.girone ? `<div style="font-size:11px;color:var(--testo-muted);font-weight:500;margin-top:1px">${p.girone}</div>` : ''}
             <div class="partita-date" style="text-align:center;margin:6px 0 2px">${formatDate(p.data)}</div>
             <div class="partita-teams">
               <div class="partita-team">${p.casa}</div>
               <div class="partita-score upcoming">Ore ${p.ora||'--'}</div>
               <div class="partita-team away">${p.ospite}</div>
             </div>
+            ${p.campo || p.maps ? `
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--grigio)">
+              ${p.maps ? `<a href="${p.maps}" target="_blank" rel="noopener" style="display:flex;align-items:flex-start;gap:7px;text-decoration:none;color:var(--testo)">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>
+                  ${p.campo ? `<span style="display:block;font-size:12px;font-weight:700;color:var(--testo)">${p.campo}</span>` : ''}
+                  <span style="font-size:11px;color:var(--azzurro);font-weight:600">Apri in Maps →</span>
+                </span>
+              </a>` : `<div style="display:flex;align-items:flex-start;gap:7px">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--testo-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span style="font-size:12px;font-weight:700;color:var(--testo)">${p.campo}</span>
+              </div>`}
+            </div>` : ''}
           </div>
         `).join('')}
       `;
@@ -686,7 +702,6 @@ function renderSquadre() {
   });
   list.innerHTML = sorted.map(s => {
     const cat = getCat(s.nome);
-    const anno = getAnno(s.nome);
     const gradient = getCatGradient(s.nome);
     const isPreferita = s.id === squadraPreferitaId;
     const photoHtml = s.foto
@@ -703,8 +718,8 @@ function renderSquadre() {
            </svg>
          </div>`;
     return `
-    <div class="squadra-card${isPreferita?' ' : ''}" style="${isPreferita?'border-color:var(--arancione);box-shadow:0 4px 16px rgba(244,124,32,0.2)':''}" onclick="openSquadra(${s.id})">
-      <div class="squadra-card-photo" style="background:${gradient};position:relative">
+    <div class="squadra-card" style="${isPreferita?'border-color:var(--arancione);box-shadow:0 4px 16px rgba(244,124,32,0.2)':''}" onclick="openSquadra(${s.id})">
+      <div class="squadra-card-photo" style="background:${gradient}">
         ${photoHtml}
         <button class="fav-btn${isPreferita?' attiva':''}" onclick="togglePreferita(${s.id},event)" title="${isPreferita?'Rimuovi dai preferiti':'Aggiungi ai preferiti'}">
           ${isPreferita
@@ -713,12 +728,8 @@ function renderSquadre() {
         </button>
       </div>
       <div class="squadra-card-body">
-        <div class="squadra-card-cat">${cat}${isPreferita?' <span style="color:var(--arancione);font-size:10px">★</span>':''}</div>
-        <div class="squadra-card-nome">${anno || s.nome.replace(cat,'').trim()}</div>
-        <div class="squadra-card-anno">${s.giocatori.length} in rosa</div>
-      </div>
-      <div class="squadra-card-arrow">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="squadra-card-cat">${cat || s.nome}${isPreferita?' <span style="color:var(--arancione)">★</span>':''}</div>
+        ${s.nome.replace(cat,'').trim() ? `<div class="squadra-card-nome">${s.nome.replace(cat,'').trim()}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -727,7 +738,10 @@ function renderSquadre() {
 function openSquadra(id) {
   const s = DATA.squadre.find(x => x.id === id);
   if(!s) return;
-  const prossima = DATA.partite.find(p => p.squadra === s.nome && p.tipo === 'prossima');
+  const today = new Date().toISOString().split('T')[0];
+  const prossima = DATA.partite
+    .filter(p => p.squadra === s.nome && p.data >= today)
+    .sort((a,b) => a.data.localeCompare(b.data))[0] || null;
 
   document.getElementById('squadre-main').style.display = 'none';
   const detail = document.getElementById('squadra-detail-view');
@@ -738,10 +752,6 @@ function openSquadra(id) {
     : `<div style="display:flex;align-items:center;justify-content:center;height:100%"><svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><circle cx="50" cy="50" r="48" fill="white" stroke="rgba(255,255,255,0.8)" stroke-width="3"/><polygon points="50,18 62,27 58,41 42,41 38,27" fill="rgba(255,255,255,0.8)"/><polygon points="76,34 88,43 84,57 72,53 68,39" fill="rgba(255,255,255,0.8)"/><polygon points="82,65 78,79 64,79 60,65 72,57" fill="rgba(255,255,255,0.8)"/><polygon points="50,82 38,79 36,65 50,58 64,65 62,79" fill="rgba(255,255,255,0.8)"/><polygon points="18,65 14,51 28,41 36,53 32,67" fill="rgba(255,255,255,0.8)"/><polygon points="24,34 36,27 42,41 28,53 16,43" fill="rgba(255,255,255,0.8)"/></svg></div>`;
 
   detail.innerHTML = `
-    <button class="back-btn" onclick="renderSquadre()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      Squadre
-    </button>
     <div class="squadra-header">
       <div class="squadra-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
       <div style="flex:1"><h2>${s.nome}</h2></div>
@@ -761,7 +771,6 @@ function openSquadra(id) {
         <div class="next-match">
           <div class="day">${formatDate(prossima.data)}</div>
           <div class="teams">${prossima.casa} <span style="font-weight:400">vs</span> ${prossima.ospite} <span class="ora">${prossima.ora ? 'Ore '+prossima.ora : ''}</span></div>
-          <div class="luogo" style="display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> ${prossima.luogo}</div>
         </div>
       </div>
     </div>` : ''}
@@ -814,9 +823,9 @@ function openSquadra(id) {
             ${s.luogoAllenamenti}
           </div>` : ''}
           ${s.mapsAllenamenti ? `
-          <a class="event-map-btn" href="${s.mapsAllenamenti}" target="_blank" rel="noopener" style="align-self:flex-start;margin-top:2px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Apri su Google Maps
+          <a class="campo-maps-btn" href="${s.mapsAllenamenti}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Maps
           </a>` : ''}
         </div>
       </div>
@@ -870,9 +879,12 @@ function renderAltro() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="contatto-body">
-                  <span class="contatto-label">Indirizzo</span>
+                  <span class="contatto-label">Indirizzo Sede</span>
                   <span class="contatto-valore">${c.valore}</span>
-                  ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="contatto-btn contatto-btn-outline">Apri Maps</a>` : ''}
+                  ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Maps
+                  </a>` : ''}
                 </div>
               </div>`;
             if (c.tipo === 'email') return `
@@ -946,8 +958,8 @@ function renderAltro() {
             <div class="campo-nome">${c.nome}</div>
             ${c.indirizzo ? `<div class="campo-indirizzo">${c.indirizzo}</div>` : ''}
             ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Apri in Maps
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Maps
             </a>` : ''}
           </div>`).join('')}
       </div>
@@ -967,7 +979,7 @@ function renderAltro() {
               <img src="${s.banner}" alt="${s.nome}" style="width:100%;height:auto;border-radius:10px;display:block">
             </a>` : `<div style="font-weight:700;color:var(--testo);margin-bottom:8px;font-size:14px">${s.nome}</div>`}
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              ${s.maps ? `<a href="${s.maps}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--azzurro);font-size:13px;font-weight:600;background:var(--azzurro-light);padding:7px 13px;border-radius:20px">
+              ${s.maps ? `<a href="${s.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Maps
               </a>` : ''}
@@ -1008,32 +1020,6 @@ function renderAltro() {
             </div>` : ''}
           </div>`).join('') : `<p>${DATA.collaborazioni}</p>`}
       </div>
-      </div>
-    </div>
-    <div class="altro-card" id="sezione-CampiAltri">
-      <div class="altro-card-header" onclick="toggleAltroCard(this)">
-        <h3 style="display:flex;align-items:center;gap:8px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          Altri Campi da Gioco
-        </h3>
-        <svg class="altro-card-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <div class="altro-card-body">
-        ${(!DATA.campiAltri || !DATA.campiAltri.length)
-          ? `<p style="font-size:13px;color:var(--testo-muted);text-align:center;padding:16px 0">Nessun campo disponibile.</p>`
-          : DATA.campiAltri.map(c => `
-            <div class="campo-item">
-              ${c.squadra ? `<div class="campo-squadra">${c.squadra}</div>` : ''}
-              <div class="campo-nome">${c.nome}</div>
-              ${c.indirizzo ? `<div class="campo-indirizzo">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                ${c.indirizzo}
-              </div>` : ''}
-              ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--azzurro);font-size:12px;font-weight:600;background:var(--azzurro-light);padding:5px 10px;border-radius:20px;margin-top:4px">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Apri in Maps
-              </a>` : ''}
-            </div>`).join('')}
       </div>
     </div>
     <div class="altro-card" id="sezione-Wallpaper">

@@ -27,10 +27,11 @@ function injectSheetsData(data) {
   // --- Notizie ---
   if (Array.isArray(data.notizie)) {
     DATA.notizie = data.notizie.map((r, i) => ({
-      id:     i + 1,
-      titolo: r.titolo || '',
-      data:   r.data   || '',
-      corpo:  r.corpo  || r.testo || ''
+      id:       i + 1,
+      titolo:   r.titolo || '',
+      data:     r.data   || '',
+      corpo:    r.corpo  || r.testo || '',
+      immagine: validUrl(r.immagine) ? r.immagine : ''
     }));
   }
 
@@ -39,10 +40,13 @@ function injectSheetsData(data) {
     DATA.partite = data.partite.map((r, i) => ({
       id:      i + 1,
       squadra: r.squadra || '',
+      girone:  r.girone  || '',
       data:    r.data    || '',
       ora:     r.ora     || '',
       casa:    r.casa    || '',
-      ospite:  r.ospite  || ''
+      ospite:  r.ospite  || '',
+      campo:   r.campo   || '',
+      maps:    r.maps    || ''
     }));
   }
 
@@ -52,6 +56,7 @@ function injectSheetsData(data) {
       id:               i + 1,
       nome:             r.nome             || '',
       girone:           r.girone           || '',
+      foto:             validUrl(r.foto)   ? r.foto : '',
       giocatori:        [],
       staff:            r.staff ? r.staff.split(';').map(s => s.trim()).filter(Boolean) : [],
       allenamenti:      r.allenamenti      || '',
