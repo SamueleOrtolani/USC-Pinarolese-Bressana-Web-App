@@ -372,17 +372,13 @@ function renderEventi() {
     return;
   }
   list.innerHTML = [...DATA.eventi].sort((a,b)=>a.data.localeCompare(b.data)).map(e => {
-    const imgHtml = e.immagine
-      ? `<img src="${e.immagine}" style="width:100%;height:auto;display:block" alt="${e.titolo}"/>`
-      : `<div class="event-img"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="6" x2="12" y2="18"/><path d="M5 9c0 0 3 1 7 1s7-1 7-1"/><path d="M5 15c0 0 3-1 7-1s7 1 7 1"/></svg></div>`;
     const mapUrl = e.mapsUrl
       ? `<a class="campo-maps-btn" href="${e.mapsUrl}" target="_blank" rel="noopener">
-           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
            Maps
          </a>` : '';
     return `
     <div class="event-card">
-      ${imgHtml}
       <div class="event-body">
         <h3>${e.titolo}</h3>
         <p>${e.descrizione}</p>
@@ -402,6 +398,7 @@ function renderEventi() {
         </div>
         ${mapUrl}
       </div>
+      ${e.immagine ? `<img src="${e.immagine}" style="width:100%;height:auto;display:block;margin-top:10px;border-radius:10px" alt="${e.titolo}"/>` : ''}
     </div>`;
   }).join('');
 }
@@ -824,7 +821,7 @@ function openSquadra(id) {
           </div>` : ''}
           ${s.mapsAllenamenti ? `
           <a class="campo-maps-btn" href="${s.mapsAllenamenti}" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             Maps
           </a>` : ''}
         </div>
@@ -882,7 +879,7 @@ function renderAltro() {
                   <span class="contatto-label">Indirizzo Sede</span>
                   <span class="contatto-valore">${c.valore}</span>
                   ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     Maps
                   </a>` : ''}
                 </div>
@@ -958,7 +955,7 @@ function renderAltro() {
             <div class="campo-nome">${c.nome}</div>
             ${c.indirizzo ? `<div class="campo-indirizzo">${c.indirizzo}</div>` : ''}
             ${c.maps ? `<a href="${c.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
               Maps
             </a>` : ''}
           </div>`).join('')}
@@ -980,7 +977,7 @@ function renderAltro() {
             </a>` : `<div style="font-weight:700;color:var(--testo);margin-bottom:8px;font-size:14px">${s.nome}</div>`}
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               ${s.maps ? `<a href="${s.maps}" target="_blank" rel="noopener" class="campo-maps-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Maps
               </a>` : ''}
               ${s.telefono ? `<a href="tel:${s.telefono.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#16a34a;font-size:13px;font-weight:600;background:rgba(22,163,74,0.12);padding:7px 13px;border-radius:20px">

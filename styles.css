@@ -542,7 +542,7 @@
   .campo-nome { font-weight: 700; color: var(--testo); font-size: 15px; }
   .campo-squadra { font-size: 12px; font-weight: 700; color: var(--azzurro); text-transform: uppercase; letter-spacing: 0.5px; }
   .campo-indirizzo { font-size: 13px; color: var(--testo-muted); line-height: 1.4; word-break: break-word; }
-  .campo-maps-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 2px; align-self: flex-start; text-decoration: none; color: var(--azzurro); font-size: 14px; font-weight: 600; background: var(--azzurro-light); padding: 7px 13px; border-radius: 20px; white-space: nowrap; }
+  .campo-maps-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 2px; align-self: flex-start; text-decoration: none; color: var(--azzurro); font-size: 13px; font-weight: 600; background: var(--azzurro-light); padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
   .sponsor-maps { font-size: 12px; color: var(--azzurro); margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600; }
   .collab-list { display: flex; flex-direction: column; gap: 10px; }
   .collab-item { background: transparent; border-radius: 0; padding: 0; border: none; }
