@@ -372,13 +372,9 @@ function renderEventi() {
     return;
   }
   list.innerHTML = [...DATA.eventi].sort((a,b)=>a.data.localeCompare(b.data)).map(e => {
-    const mapUrl = e.mapsUrl
-      ? `<a class="campo-maps-btn" href="${e.mapsUrl}" target="_blank" rel="noopener">
-           <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-           Maps
-         </a>` : '';
     return `
     <div class="event-card">
+      ${e.immagine ? `<img src="${e.immagine}" style="width:100%;height:auto;display:block;border-radius:10px 10px 0 0" alt="${e.titolo}"/>` : ''}
       <div class="event-body">
         <h3>${e.titolo}</h3>
         <p>${e.descrizione}</p>
@@ -396,9 +392,13 @@ function renderEventi() {
             ${e.luogo}
           </div>
         </div>
-        ${mapUrl}
+        ${e.mapsUrl ? `<div style="display:flex;justify-content:center;margin-top:12px">
+          <a class="campo-maps-btn" href="${e.mapsUrl}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Maps
+          </a>
+        </div>` : ''}
       </div>
-      ${e.immagine ? `<img src="${e.immagine}" style="width:100%;height:auto;display:block;margin-top:10px;border-radius:10px" alt="${e.titolo}"/>` : ''}
     </div>`;
   }).join('');
 }
@@ -718,14 +718,14 @@ function renderSquadre() {
     <div class="squadra-card" style="${isPreferita?'border-color:var(--arancione);box-shadow:0 4px 16px rgba(244,124,32,0.2)':''}" onclick="openSquadra(${s.id})">
       <div class="squadra-card-photo" style="background:${gradient}">
         ${photoHtml}
-        <button class="fav-btn${isPreferita?' attiva':''}" onclick="togglePreferita(${s.id},event)" title="${isPreferita?'Rimuovi dai preferiti':'Aggiungi ai preferiti'}">
-          ${isPreferita
-            ? `<svg viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
-            : `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`}
-        </button>
       </div>
       <div class="squadra-card-body">
-        <div class="squadra-card-cat">${cat || s.nome}${isPreferita?' <span style="color:var(--arancione)">★</span>':''}</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+          <div class="squadra-card-cat">${cat || s.nome}</div>
+          <button class="fav-card-btn${isPreferita?' attiva':''}" onclick="togglePreferita(${s.id},event)" title="${isPreferita?'Rimuovi dai preferiti':'Aggiungi ai preferiti'}">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="${isPreferita?'var(--arancione)':'none'}" stroke="${isPreferita?'var(--arancione)':'var(--testo-muted)'}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
         ${s.nome.replace(cat,'').trim() ? `<div class="squadra-card-nome">${s.nome.replace(cat,'').trim()}</div>` : ''}
       </div>
     </div>`;
@@ -749,9 +749,8 @@ function openSquadra(id) {
     : `<div style="display:flex;align-items:center;justify-content:center;height:100%"><svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="opacity:0.5"><circle cx="50" cy="50" r="48" fill="white" stroke="rgba(255,255,255,0.8)" stroke-width="3"/><polygon points="50,18 62,27 58,41 42,41 38,27" fill="rgba(255,255,255,0.8)"/><polygon points="76,34 88,43 84,57 72,53 68,39" fill="rgba(255,255,255,0.8)"/><polygon points="82,65 78,79 64,79 60,65 72,57" fill="rgba(255,255,255,0.8)"/><polygon points="50,82 38,79 36,65 50,58 64,65 62,79" fill="rgba(255,255,255,0.8)"/><polygon points="18,65 14,51 28,41 36,53 32,67" fill="rgba(255,255,255,0.8)"/><polygon points="24,34 36,27 42,41 28,53 16,43" fill="rgba(255,255,255,0.8)"/></svg></div>`;
 
   detail.innerHTML = `
-    <div class="squadra-header">
-      <div class="squadra-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
-      <div style="flex:1"><h2>${s.nome}</h2></div>
+    <div class="squadra-header" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <h2 style="margin:0;width:100%">${s.nome}</h2>
       <button id="fav-detail-btn" class="fav-detail-btn${s.id === squadraPreferitaId ? ' attiva' : ''}" onclick="togglePreferitaDetail(${s.id})">
         ${starIcon(s.id === squadraPreferitaId)}
         ${s.id === squadraPreferitaId ? 'Preferita' : 'Imposta preferita'}
@@ -759,17 +758,27 @@ function openSquadra(id) {
     </div>
     <div class="squadra-photo">${photoHtml}</div>
     ${prossima ? `
-    <div class="accordion-item">
-      <div class="accordion-header open" onclick="toggleAccordion(this)">
-        PROSSIMA PARTITA
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+    <div style="margin:0 16px 8px;background:var(--bianco);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:14px 16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--azzurro);margin-bottom:10px">Prossima Partita</div>
+      <div class="partita-date" style="text-align:center;margin-bottom:4px">${formatDate(prossima.data)}</div>
+      <div class="partita-teams">
+        <div class="partita-team">${prossima.casa}</div>
+        <div class="partita-score upcoming">Ore ${prossima.ora||'--'}</div>
+        <div class="partita-team away">${prossima.ospite}</div>
       </div>
-      <div class="accordion-body">
-        <div class="next-match">
-          <div class="day">${formatDate(prossima.data)}</div>
-          <div class="teams">${prossima.casa} <span style="font-weight:400">vs</span> ${prossima.ospite} <span class="ora">${prossima.ora ? 'Ore '+prossima.ora : ''}</span></div>
-        </div>
-      </div>
+      ${prossima.campo || prossima.maps ? `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--grigio)">
+        ${prossima.maps ? `<a href="${prossima.maps}" target="_blank" rel="noopener" style="display:flex;align-items:flex-start;gap:7px;text-decoration:none;color:var(--testo)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--azzurro)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>
+            ${prossima.campo ? `<span style="display:block;font-size:12px;font-weight:700;color:var(--testo)">${prossima.campo}</span>` : ''}
+            <span style="font-size:11px;color:var(--azzurro);font-weight:600">Apri in Maps →</span>
+          </span>
+        </a>` : `<div style="display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--testo-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style="font-size:12px;font-weight:700;color:var(--testo)">${prossima.campo}</span>
+        </div>`}
+      </div>` : ''}
     </div>` : ''}
     <div class="accordion-item">
       <div class="accordion-header" onclick="toggleAccordion(this)">

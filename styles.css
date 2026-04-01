@@ -684,6 +684,10 @@
   .fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
   .fav-btn svg { width: 16px; height: 16px; }
   .fav-btn.attiva { background: rgba(244,124,32,0.85); }
+  .fav-card-btn {
+    background: none; border: none; cursor: pointer; padding: 0; line-height: 1;
+    display: flex; align-items: center; flex-shrink: 0;
+  }
 
   .fav-detail-btn {
     display: flex; align-items: center; gap: 6px;
